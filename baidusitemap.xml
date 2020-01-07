@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://zevwings.com/2019/04/10/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E5%AF%B9%E8%B1%A1%E5%85%B3%E8%81%94/</loc>
+    <lastmod>2020-01-07</lastmod>
+  </url>  <url>
+    <loc>https://zevwings.com/2018/08/16/Cocoapods%E5%B0%8F%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/</loc>
+    <lastmod>2020-01-07</lastmod>
+  </url>  <url>
+    <loc>https://zevwings.com/2018/08/16/Cocoapods%E5%B0%8F%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/</loc>
+    <lastmod>2020-01-07</lastmod>
+  </url>  <url>
     <loc>https://zevwings.com/2019/07/23/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9AGCD/</loc>
     <lastmod>2019-11-04</lastmod>
   </url>  <url>
     <loc>https://zevwings.com/2019/05/14/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%9B%9B%EF%BC%89%EF%BC%9Aivar/</loc>
     <lastmod>2019-11-04</lastmod>
   </url>  <url>
-    <loc>https://zevwings.com/2019/05/16/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%94%EF%BC%89%EF%BC%9AMethod-Swizzling/</loc>
+    <loc>https://zevwings.com/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSOperation/</loc>
+    <lastmod>2019-11-04</lastmod>
+  </url>  <url>
+    <loc>https://zevwings.com/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSThread/</loc>
     <lastmod>2019-11-04</lastmod>
   </url>  <url>
     <loc>https://zevwings.com/2019/07/18/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%85%AD%EF%BC%89%EF%BC%9ANSObject%E5%8D%8F%E8%AE%AE/</loc>
     <lastmod>2019-11-04</lastmod>
   </url>  <url>
-    <loc>https://zevwings.com/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSOperation/</loc>
-    <lastmod>2019-11-04</lastmod>
-  </url>  <url>
-    <loc>https://zevwings.com/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSThread/</loc>
+    <loc>https://zevwings.com/2019/05/16/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%94%EF%BC%89%EF%BC%9AMethod-Swizzling/</loc>
     <lastmod>2019-11-04</lastmod>
   </url>  <url>
     <loc>https://zevwings.com/2018/08/16/iOS%E4%B8%89%E6%96%B9%E5%BA%93%E6%94%B6%E9%9B%86%EF%BC%88%E6%8C%81%E7%BB%AD%E6%9B%B4%E8%A1%8C%E4%B8%AD/</loc>
@@ -29,15 +38,6 @@
     <lastmod>2019-11-04</lastmod>
   </url>  <url>
     <loc>https://zevwings.com/2019/05/14/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9Aproperty/</loc>
-    <lastmod>2019-11-04</lastmod>
-  </url>  <url>
-    <loc>https://zevwings.com/2019/04/10/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E5%AF%B9%E8%B1%A1%E5%85%B3%E8%81%94/</loc>
-    <lastmod>2019-11-04</lastmod>
-  </url>  <url>
-    <loc>https://zevwings.com/2018/08/16/Cocoapods%E5%B0%8F%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/</loc>
-    <lastmod>2019-11-04</lastmod>
-  </url>  <url>
-    <loc>https://zevwings.com/2018/08/16/Cocoapods%E5%B0%8F%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/</loc>
     <lastmod>2019-11-04</lastmod>
   </url>  <url>
     <loc>https://zevwings.com/2018/08/16/Homebrew-%E5%B0%8F%E8%AE%B0/</loc>
