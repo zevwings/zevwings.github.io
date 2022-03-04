@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="和NSOperation和NSThread一样，GCD也是我们常用的线程操作方式之一，较前两者而言，GCD操作更为简单，我们在项目中使用也很广泛，接下来我们就一起来看看GCD的使用方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS多线程操作：GCD">
+<meta property="og:url" content="https://zevwings.github.io/2019/07/23/2019/07/23/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9AGCD/index.html">
+<meta property="og:site_name" content="zevwings">
+<meta property="og:description" content="和NSOperation和NSThread一样，GCD也是我们常用的线程操作方式之一，较前两者而言，GCD操作更为简单，我们在项目中使用也很广泛，接下来我们就一起来看看GCD的使用方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-07-23T07:16:29.000Z">
+<meta property="article:modified_time" content="2019-11-04T01:07:53.000Z">
+<meta property="article:author" content="zevwings">
+<meta property="article:tag" content="iOS">
+<meta property="article:tag" content="Thread">
+<meta property="article:tag" content="GCD">
+<meta name="twitter:card" content="summary">
+  <title>iOS多线程操作：GCD | zevwings</title>
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS&#x2F;woiFS3uNKo8eIuni59rjyNGtXfstRzStA&#x3D;" crossorigin="anonymous">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo&#x3D;" defer crossorigin="anonymous"></script>
+
+  
+  
+    
+<script src="/js/toc.js" defer></script>
+
+  
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@2.1.4/fingerprint2.min.js" defer></script>
+
+    
+<script src="/js/fingerprint.js" defer></script>
+
+    
+<script src="/js/gist.js" defer></script>
+
+    
+<script src="/js/like.js" defer type="module"></script>
+
+  
+  
+<script src="/js/script.js" defer></script>
+
+  
+<script src="/js/search.js" defer></script>
+
+  
+<script src="/js/chocolate.js" defer></script>
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP&#x2F;HTHLT7097U8Y5b8&#x3D;" crossorigin="anonymous" defer></script>
+
+  
+  
+  
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header" class="post-header">
+    <div id="header-inner">
+        <nav id="main-nav">
+            <a id="main-nav-toggle" class="nav-icon"></a>
+            
+                <a class="main-nav-link" href="/">Home</a>
+            
+                <a class="main-nav-link" href="/categories">Category</a>
+            
+                <a class="main-nav-link" href="/archives">Archive</a>
+            
+        </nav>
+        <nav id="sub-nav">
+            <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+        </nav>
+        <div id="search-form-wrap">
+            <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://zevwings.github.io"></form>
+        </div>
+    </div>
+</header>
+
+      <div class="post-outer" data-post-title="iOS多线程操作：GCD" id="post">
+  <section class="post-toc">
+    <aside class="post-fixed-container">
+  <div class="toc-wrap">
+  <h3 class="toc-title">目录</h3>
+  <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%9F%E5%88%97"><span class="toc-text">队列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1"><span class="toc-text">任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%9F%E5%88%97%E5%88%9B%E5%BB%BA"><span class="toc-text">队列创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E5%88%9B%E5%BB%BA"><span class="toc-text">任务创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%B2%E8%A1%8C%E9%98%9F%E5%88%97-%E5%90%8C%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="toc-text">串行队列 + 同步执行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%B2%E8%A1%8C%E9%98%9F%E5%88%97-%E5%BC%82%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="toc-text">串行队列 + 异步执行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E8%A1%8C%E9%98%9F%E5%88%97-%E5%90%8C%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="toc-text">并行队列 + 同步执行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E8%A1%8C%E9%98%9F%E5%88%97-%E5%BC%82%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="toc-text">并行队列 + 异步执行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1"><span class="toc-text">线程间通信</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#asyncAfter"><span class="toc-text">asyncAfter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#concurrentPerform"><span class="toc-text">concurrentPerform</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DispatchGroup"><span class="toc-text">DispatchGroup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80"><span class="toc-text">方法一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8C"><span class="toc-text">方法二</span></a></li></ol>
+</div>
+
+  
+    <div id="post-like" data-token="Z2hwX0V5NnU3UjU5UjRiMktFNlJhbDRnR29DbmZzTmJONDBXZkpmSQ==">
+  <div class="container">
+    <a class="like-icon"></a>
+    <span id="like-count"></span>
+  </div>
+</div>
+
+  
+</aside>
+
+  </section>
+  <section class="post-main">
+    <article id="post-2019/07/23/iOS多线程操作：GCD" class="h-entry article article-type-post"
+  itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <p class="article-date">
+  <time class="dt-published" datetime="2019-07-23T07:16:29.000Z" itemprop="datePublished">2019-07-23</time>
+</p>
+
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Thread/">Thread</a>
+  </div>
+
+
+  </div>
+  <div class="article-inner">
+    
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      iOS多线程操作：GCD
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>和<code>NSOperation</code>和<code>NSThread</code>一样，<code>GCD</code>也是我们常用的线程操作方式之一，较前两者而言，<code>GCD</code>操作更为简单，我们在项目中使用也很广泛，接下来我们就一起来看看<code>GCD</code>的使用方法。</p>
+<span id="more"></span>
+
+<h1 id="队列和任务的基本概念"><a href="#队列和任务的基本概念" class="headerlink" title="队列和任务的基本概念"></a>队列和任务的基本概念</h1><p>在正式学习<code>GCD</code>代码使用之前，我们先看看<code>队列</code>和<code>任务</code>这两个盖帘</p>
+<h3 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h3><p><code>GCD</code>主要使用的队列又<code>串行队列</code>和<code>并行队列</code>两种</p>
+<p><strong>串行队列：</strong>每次只有一个任务被执行。让任务一个接着一个地执行。（只开启一个线程，一个任务执行完毕后，再执行下一个任务）</p>
+<p><strong>并行队列：</strong>可以让多个任务并发（同时）执行。（可以开启多个线程，并且同时执行任务）</p>
+<h3 id="任务"><a href="#任务" class="headerlink" title="任务"></a>任务</h3><p><code>任务</code>即是我们代码执行中的代码块，我们可能需要代码在依次等待执行或者同时可以执行多个任务，主要分为<code>同步执行</code>和<code>异步执行</code>两种方式，主要的区别在于<code>异步执行</code>具有开启新线程的能力而<code>同不执行</code>不具有开启新线程的能力。</p>
+<ul>
+<li>同步执行（sync）<ul>
+<li>同步添加任务到指定的队列中，在添加的任务执行结束之前，会一直等待，直到队列里面的任务完成之后再继续执行。</li>
+<li>只能在当前线程中执行任务，不具备开启新线程的能力。</li>
+</ul>
+</li>
+<li>异步执行（async）<ul>
+<li>异步添加任务到指定的队列中，它不会做任何等待，可以继续执行任务。</li>
+<li>可以在新的线程中执行任务，具备开启新线程的能力。</li>
+</ul>
+</li>
+</ul>
+<h2 id="GCD的基本使用"><a href="#GCD的基本使用" class="headerlink" title="GCD的基本使用"></a>GCD的基本使用</h2><p>在了解了<code>任务</code>和<code>队列</code>的基本概念之后我们看看<code>GCD</code>的具体使用方法。</p>
+<h3 id="队列创建"><a href="#队列创建" class="headerlink" title="队列创建"></a>队列创建</h3><p>在上面我们了解到了队列分为<code>串行队列</code>和<code>并行队列</code>两种，那么我们先来看看它们是如何创建的</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建一个串行队列，swift中默认为`串行队列`</span></span><br><span class="line"><span class="keyword">let</span> serialQueue1 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.serial.queue1&quot;</span>)</span><br><span class="line"><span class="comment">// 创建一个并行队列，设置`attributes`为`.concurrent`为`串行队列`</span></span><br><span class="line"><span class="keyword">let</span> concurrentQueue1 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.concurrent.queue1&quot;</span>,</span><br><span class="line">                                     attributes: .concurrent)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们再看一下<code>DispatchQueue</code>相关的初始化属性。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> queue <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.queue.label&quot;</span>,</span><br><span class="line">                          qos: .default,</span><br><span class="line">                          attributes: .concurrent,</span><br><span class="line">                          autoreleaseFrequency:inherit,</span><br><span class="line">                          target: <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+
+<p>**label: **队列的名称，方便调试。<br>**qos: **服务质量，队列中在执行时是有优先级的，优先级越高的队列将获得更多的计算资源。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 非常低的优先级（这个优先级只用于不太关心完成时间的真正的后台任务）</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> background: <span class="type">DispatchQoS</span></span><br><span class="line"><span class="comment">// 低优先级</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> utility: <span class="type">DispatchQoS</span></span><br><span class="line"><span class="comment">// 普通优先级</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> `default`: <span class="type">DispatchQoS</span></span><br><span class="line"><span class="comment">// 稍低优先级</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> userInitiated: <span class="type">DispatchQoS</span></span><br><span class="line"><span class="comment">// 最高优先级</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> userInteractive: <span class="type">DispatchQoS</span></span><br><span class="line"><span class="comment">// 普通优先级，小于default</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> unspecified: <span class="type">DispatchQoS</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 优先级高低排序</span></span><br><span class="line"><span class="comment">// userInteractive &gt; default &gt; unspecified &gt; userInitiated &gt; utility &gt; background</span></span><br></pre></td></tr></table></figure>
+
+<p>**attributes: **OptionSet，不设置该值，则表示创建串行队列。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 标识队列为并行队列</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> concurrent: <span class="type">DispatchQueue</span>.<span class="type">Attributes</span></span><br><span class="line"><span class="comment">// 标识运行队列中的任务需要手动触发，由队列的 activate 方法进行触发。</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> initiallyInactive: <span class="type">DispatchQueue</span>.<span class="type">Attributes</span></span><br></pre></td></tr></table></figure>
+
+<p>**autoreleaseFrequency: **用来设置负责管理任务内对象生命周期的<code>autorelease pool</code>的自动释放频率。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> <span class="title class_">AutoreleaseFrequency</span> &#123;</span><br><span class="line">    <span class="comment">// 继承目标队列的该属性，初始化默认值</span></span><br><span class="line">    <span class="keyword">case</span> inherit</span><br><span class="line">    <span class="comment">// 跟随每个任务的执行周期进行自动创建和释放</span></span><br><span class="line">    <span class="keyword">case</span> workItem</span><br><span class="line">    <span class="comment">// 不会自动创建 autorelease pool，需要手动管理。</span></span><br><span class="line">    <span class="keyword">case</span> never</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>**target: **目标队列，即队列中的任务运行时实际所在的队列。目标队列最终约束了队列的优先级等属性。</p>
+<p>如上便是初始化一个<code>DispatchQueue</code>的方法简介，下面我们开始学习它的用法。</p>
+<h3 id="任务创建"><a href="#任务创建" class="headerlink" title="任务创建"></a>任务创建</h3><p>在上面，我们了解到任务主要分为<code>同步任务</code>和<code>异步任务</code>两种，我们接下来先看看如何创建任务。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 同步任务</span></span><br><span class="line"><span class="keyword">let</span> queue <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.queue&quot;</span>)</span><br><span class="line"><span class="keyword">let</span> syncWorkItem <span class="operator">=</span> <span class="type">DispatchWorkItem</span>(qos: .userInitiated, flags: [], block: &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;同步任务 - DispatchWorkItem形式&quot;</span>)</span><br><span class="line">&#125;)</span><br><span class="line">queue.sync(execute: syncWorkItem)</span><br><span class="line"></span><br><span class="line">queue.sync &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;同步任务 - 闭包形式&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">queue.sync(flags: []) &#123; () -&gt; <span class="type">Void</span> <span class="keyword">in</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;同步任务 - 闭包形式（添加DispatchWorkItemFlags）&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 异步任务</span></span><br><span class="line"><span class="keyword">let</span> asyncWorkItem <span class="operator">=</span> <span class="type">DispatchWorkItem</span>(qos: .unspecified, flags: .barrier, block: &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;异步任务 - DispatchWorkItem形式&quot;</span>)</span><br><span class="line">&#125;)</span><br><span class="line">queue.async(execute: asyncWorkItem)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> group <span class="operator">=</span> <span class="type">DispatchGroup</span>()</span><br><span class="line">queue.async(group: group, execute: <span class="type">DispatchWorkItem</span>(qos: .unspecified, flags: .barrier, block: &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;异步任务 - 闭包形式&quot;</span>)</span><br><span class="line">&#125;))</span><br><span class="line"></span><br><span class="line">queue.async(group:<span class="literal">nil</span> qos: .unspecified, flags: []) &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;异步任务 - 闭包形式（添加DispatchWorkItemFlags）&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>GCD</code>主要使用<code>sync</code>来创建同步任务，<code>async</code>来创建异步任务，从上述代码我可以看到几种不同的创建任务的方式，主要有直接使用闭包创建任务和使用<code>DispatchWorkItem</code>来创建任务。</p>
+<p>我们可以看到再创建任务的参数中除了有<code>DispatchQoS</code>可以用来控制任务的优先级外，我们还有一个<code>DispatchWorkItemFlags</code>的参数。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">DispatchWorkItemFlags</span> : <span class="title class_">OptionSet</span>, <span class="title class_">RawRepresentable</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 执行情况，栅栏，相当于`Objective-C`的dispath_barrier，向队列中添加一系列任务后，使用 `barrier`来隔离前面的任务，保证前面的任务执行完成在执行后面的任务</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> barrier: <span class="type">DispatchWorkItemFlags</span></span><br><span class="line">		<span class="comment">// 执行上下文分离</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> detached: <span class="type">DispatchWorkItemFlags</span></span><br><span class="line">    <span class="comment">// 表示QoS根据创建时的context决定。</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> assignCurrentContext: <span class="type">DispatchWorkItemFlags</span></span><br><span class="line">		<span class="comment">// 覆盖，没有QoS</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> noQoS: <span class="type">DispatchWorkItemFlags</span></span><br><span class="line">		<span class="comment">// 覆盖，继承Queue的QoS</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> inheritQoS: <span class="type">DispatchWorkItemFlags</span></span><br><span class="line">		<span class="comment">// 覆盖，自己的QoS覆盖Queue</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">let</span> enforceQoS: <span class="type">DispatchWorkItemFlags</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们最常用的就是<code>.barrier</code>，这个可以代替<code>Objective-C</code>中的<code>dispatch_barrier</code>，具体使用如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> concurrentQueue <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.uraimo.Concurrent&quot;</span>, attributes: .concurrent)</span><br><span class="line"></span><br><span class="line">concurrentQueue.async &#123;</span><br><span class="line">    <span class="type">DispatchQueue</span>.concurrentPerform(iterations: <span class="number">5</span>) &#123; idx <span class="keyword">in</span></span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Async on concurrentQueue, 5 times: <span class="subst">\(idx)</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 任务在上述任务执行完成之后执行</span></span><br><span class="line">concurrentQueue.async (flags: .barrier) &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;All 5 concurrent tasks completed&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在看完任务和队列的创建之后，我们开始看一下任务和队列的组合使用。</p>
+<h3 id="串行队列-同步执行"><a href="#串行队列-同步执行" class="headerlink" title="串行队列 + 同步执行"></a>串行队列 + 同步执行</h3><ul>
+<li>在串行队列中，任务依次单个执行</li>
+<li>同步执行，不能开启新线程，会阻塞当前线程</li>
+</ul>
+<p>下面我们执行如下代码查看<code>串行队列</code>执行同步操作的结果。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> serialQueue1 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.serial.queue1&quot;</span>)</span><br><span class="line"><span class="keyword">let</span> serialQueue2 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.serial.queue2&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> task <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;------------------------ task <span class="subst">\(task)</span> ------------------------&quot;</span>)</span><br><span class="line">    serialQueue1.sync &#123;</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;serial queue 1 output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> task <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;------------------------ task <span class="subst">\(task)</span> ------------------------&quot;</span>)</span><br><span class="line">    serialQueue2.sync &#123;</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;serial queue 2 output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;main thread.&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>执行上面的代码，我们可以看到结果如下，依次执行了<code>for</code>循环中的每一个任务，并且<code>serialQueue2</code>在<code>serialQueue1</code>执行完成后才开始执行任务，并且最后才执行<code>print(&quot;main thread.&quot;)</code>输出<code>main thread.</code>阻塞了当前的线程（主线程）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">------------------------ task 0 ------------------------</span><br><span class="line">serial queue 1 task 0 output 0</span><br><span class="line">serial queue 1 task 0 output 1</span><br><span class="line">serial queue 1 task 0 output 2</span><br><span class="line">------------------------ task 1 ------------------------</span><br><span class="line">serial queue 1 task 1 output 0</span><br><span class="line">serial queue 1 task 1 output 1</span><br><span class="line">serial queue 1 task 1 output 2</span><br><span class="line">------------------------ task 2 ------------------------</span><br><span class="line">serial queue 1 task 2 output 0</span><br><span class="line">serial queue 1 task 2 output 1</span><br><span class="line">serial queue 1 task 2 output 2</span><br><span class="line">------------------------ task 0 ------------------------</span><br><span class="line">serial queue 2 task 0 output 0</span><br><span class="line">serial queue 2 task 0 output 1</span><br><span class="line">serial queue 2 task 0 output 2</span><br><span class="line">------------------------ task 1 ------------------------</span><br><span class="line">serial queue 2 task 1 output 0</span><br><span class="line">serial queue 2 task 1 output 1</span><br><span class="line">serial queue 2 task 1 output 2</span><br><span class="line">------------------------ task 2 ------------------------</span><br><span class="line">serial queue 2 task 2 output 0</span><br><span class="line">serial queue 2 task 2 output 1</span><br><span class="line">serial queue 2 task 2 output 2</span><br><span class="line">main thread.</span><br></pre></td></tr></table></figure>
+
+<h3 id="串行队列-异步执行"><a href="#串行队列-异步执行" class="headerlink" title="串行队列 + 异步执行"></a>串行队列 + 异步执行</h3><ul>
+<li>在串行队列中，任务依次单个执行</li>
+<li>异步执行，可以开启新线程，不会阻塞当前线程</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> serialQueue1 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.serial.queue1&quot;</span>)</span><br><span class="line"><span class="keyword">let</span> serialQueue2 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.serial.queue2&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> task <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;------------------------ task <span class="subst">\(task)</span> ------------------------&quot;</span>)</span><br><span class="line">    serialQueue1.async &#123;</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;serial queue 1 output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> task <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;------------------------ task <span class="subst">\(task)</span> ------------------------&quot;</span>)</span><br><span class="line">    serialQueue2.async &#123;</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;serial queue 2 output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;main thread.&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>同样的，执行上面的代码，并且查看结果，我们可以发现这些无序打印的结果，但是我们不难发现，在每个队列中，我们的任务是顺序执行的，<code>task0</code>、<code>task1</code>、<code>task2</code>依次顺序执行，并且没有等待到所有任务执行完成之后才执行<code>print(&quot;main thread.&quot;)</code>，所以并没有没有阻塞当前线程（主线程）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">------------------------ task 0 ------------------------</span><br><span class="line">------------------------ task 1 ------------------------</span><br><span class="line">serial queue 1 task 0 output 0</span><br><span class="line">------------------------ task 2 ------------------------</span><br><span class="line">------------------------ task 0 ------------------------</span><br><span class="line">------------------------ task 1 ------------------------</span><br><span class="line">------------------------ task 2 ------------------------</span><br><span class="line">serial queue 2 task 0 output 0</span><br><span class="line">main thread.</span><br><span class="line">serial queue 1 task 0 output 1</span><br><span class="line">serial queue 2 task 0 output 1</span><br><span class="line">serial queue 1 task 0 output 2</span><br><span class="line">serial queue 2 task 0 output 2</span><br><span class="line">serial queue 1 task 1 output 0</span><br><span class="line">serial queue 2 task 1 output 0</span><br><span class="line">serial queue 1 task 1 output 1</span><br><span class="line">serial queue 2 task 1 output 1</span><br><span class="line">serial queue 1 task 1 output 2</span><br><span class="line">serial queue 2 task 1 output 2</span><br><span class="line">serial queue 1 task 2 output 0</span><br><span class="line">serial queue 2 task 2 output 0</span><br><span class="line">serial queue 2 task 2 output 1</span><br><span class="line">serial queue 1 task 2 output 1</span><br><span class="line">serial queue 1 task 2 output 2</span><br><span class="line">serial queue 2 task 2 output 2</span><br></pre></td></tr></table></figure>
+
+<h3 id="并行队列-同步执行"><a href="#并行队列-同步执行" class="headerlink" title="并行队列 + 同步执行"></a>并行队列 + 同步执行</h3><ul>
+<li>在串行队列中，同时执行多个任务</li>
+<li>同步执行，不能开启新线程，会阻塞当前线程</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> concurrentQueue1 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.concurrent.queue1&quot;</span>,</span><br><span class="line">                                     attributes: .concurrent)</span><br><span class="line"><span class="keyword">let</span> concurrentQueue2 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.concurrent.queue2&quot;</span>,</span><br><span class="line">                                     attributes: .concurrent)</span><br><span class="line"><span class="keyword">for</span> task <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;------------------------ task <span class="subst">\(task)</span> ------------------------&quot;</span>)</span><br><span class="line">    concurrentQueue1.sync &#123;</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;serial queue 1 task <span class="subst">\(task)</span> output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> task <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;------------------------ task <span class="subst">\(task)</span> ------------------------&quot;</span>)</span><br><span class="line">    concurrentQueue2.sync &#123;</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;serial queue 2 task <span class="subst">\(task)</span> output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;main thread.&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>和前面一样，我们执行上面的代码，得到如下结果，乍一看执行结果和<code>串行队列</code>同步执行一样，但是这确实是在<code>串行队列</code>中的执行结果，因为我们使用同步执行方法导致无法开启新线程，所以还是会依次执行每一个任务。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">------------------------ task 0 ------------------------</span><br><span class="line">serial queue 1 task 0 output 0</span><br><span class="line">serial queue 1 task 0 output 1</span><br><span class="line">serial queue 1 task 0 output 2</span><br><span class="line">------------------------ task 1 ------------------------</span><br><span class="line">serial queue 1 task 1 output 0</span><br><span class="line">serial queue 1 task 1 output 1</span><br><span class="line">serial queue 1 task 1 output 2</span><br><span class="line">------------------------ task 2 ------------------------</span><br><span class="line">serial queue 1 task 2 output 0</span><br><span class="line">serial queue 1 task 2 output 1</span><br><span class="line">serial queue 1 task 2 output 2</span><br><span class="line">------------------------ task 0 ------------------------</span><br><span class="line">serial queue 2 task 0 output 0</span><br><span class="line">serial queue 2 task 0 output 1</span><br><span class="line">serial queue 2 task 0 output 2</span><br><span class="line">------------------------ task 1 ------------------------</span><br><span class="line">serial queue 2 task 1 output 0</span><br><span class="line">serial queue 2 task 1 output 1</span><br><span class="line">serial queue 2 task 1 output 2</span><br><span class="line">------------------------ task 2 ------------------------</span><br><span class="line">serial queue 2 task 2 output 0</span><br><span class="line">serial queue 2 task 2 output 1</span><br><span class="line">serial queue 2 task 2 output 2</span><br><span class="line">main thread.</span><br></pre></td></tr></table></figure>
+
+<h3 id="并行队列-异步执行"><a href="#并行队列-异步执行" class="headerlink" title="并行队列 + 异步执行"></a>并行队列 + 异步执行</h3><ul>
+<li>在串行队列中，同时执行多个任务</li>
+<li>异步执行，可以开启新线程，不会阻塞当前线程</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> concurrentQueue1 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.concurrent.queue1&quot;</span>,</span><br><span class="line">                                     attributes: .concurrent)</span><br><span class="line"><span class="keyword">let</span> concurrentQueue2 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.concurrent.queue2&quot;</span>,</span><br><span class="line">                                     attributes: .concurrent)</span><br><span class="line"><span class="keyword">for</span> task <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;------------------------ task <span class="subst">\(task)</span> ------------------------&quot;</span>)</span><br><span class="line">    concurrentQueue1.async &#123;</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;serial queue 1 task <span class="subst">\(task)</span> output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> task <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;------------------------ task <span class="subst">\(task)</span> ------------------------&quot;</span>)</span><br><span class="line">    concurrentQueue2.async &#123;</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;serial queue 2 task <span class="subst">\(task)</span> output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;main thread.&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>一样的重复，执行得到如下结果，这里我们可以发现和<code>串行队列</code>的区别，这里面的<code>task</code> 输出结果是交叉输出的，也就是说，我们的任务是并行执行的。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">------------------------ task 0 ------------------------</span><br><span class="line">------------------------ task 1 ------------------------</span><br><span class="line">serial queue 1 task 0 output 0</span><br><span class="line">------------------------ task 2 ------------------------</span><br><span class="line">------------------------ task 0 ------------------------</span><br><span class="line">------------------------ task 1 ------------------------</span><br><span class="line">------------------------ task 2 ------------------------</span><br><span class="line">main thread.</span><br><span class="line">serial queue 1 task 1 output 0</span><br><span class="line">serial queue 1 task 2 output 0</span><br><span class="line">serial queue 2 task 0 output 0</span><br><span class="line">serial queue 2 task 1 output 0</span><br><span class="line">serial queue 2 task 2 output 0</span><br><span class="line">serial queue 1 task 0 output 1</span><br><span class="line">serial queue 1 task 1 output 1</span><br><span class="line">serial queue 1 task 2 output 1</span><br><span class="line">serial queue 2 task 0 output 1</span><br><span class="line">serial queue 2 task 1 output 1</span><br><span class="line">serial queue 2 task 2 output 1</span><br><span class="line">serial queue 1 task 1 output 2</span><br><span class="line">serial queue 1 task 0 output 2</span><br><span class="line">serial queue 1 task 2 output 2</span><br><span class="line">serial queue 2 task 0 output 2</span><br><span class="line">serial queue 2 task 2 output 2</span><br><span class="line">serial queue 2 task 1 output 2</span><br></pre></td></tr></table></figure>
+
+<p>从上面种执行方式的结果我们可以得出结论：</p>
+<table>
+<thead>
+<tr>
+<th align="center">区别</th>
+<th align="center">并发队列</th>
+<th align="center">串行队列</th>
+<th align="center">主队列</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">同步(sync)</td>
+<td align="center">没有开启新线程，串行执行任务</td>
+<td align="center">没有开启新线程，串行执行任务</td>
+<td align="center">主线程调用：死锁卡住不执行 其它线程调用：没有开启新线程，串行执行任务</td>
+</tr>
+<tr>
+<td align="center">异步(async)</td>
+<td align="center">有开启新线程，并发执行任务</td>
+<td align="center">有开启新线程(1条)，串行执行任务</td>
+<td align="center">没有开启新线程，串行执行任务</td>
+</tr>
+</tbody></table>
+<h3 id="线程间通信"><a href="#线程间通信" class="headerlink" title="线程间通信"></a>线程间通信</h3><p><code>GCD</code>可以方便快捷的进行线程间通讯，只需要在线程执行闭包中调用需要通讯的线程即可。比如我们当前队列中执行任务完成后需要回到主线程中执行任务，可以使用如下方式。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.concurrent.queue&quot;</span>)</span><br><span class="line">    .async &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;------------------------ async task ------------------------&quot;</span>)</span><br><span class="line">        <span class="keyword">for</span> output <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">2</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;execute in queue output <span class="subst">\(output)</span>&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">DispatchQueue</span>.main.async &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;execute in main queue&quot;</span>)</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="GCD的其它使用方法"><a href="#GCD的其它使用方法" class="headerlink" title="GCD的其它使用方法"></a>GCD的其它使用方法</h2><h3 id="asyncAfter"><a href="#asyncAfter" class="headerlink" title="asyncAfter"></a>asyncAfter</h3><p><code>asyncAfter</code>的调用方法都会有<code>deadline</code>和<code>wallDeadline</code>两种不同的调用方法，这两个最主要的区别在于<code>deadline</code>不依赖于系统时间，而<code>wallDeadline</code>依赖与系统时间，即我们设置好执行计时后，我们调整系统时间，<code>wallDeadline</code>会因为系统时间修改而发生变化，而<code>deadline</code>不会，举个例子，我们设置执行时间为1分钟后执行，然后修改系统时间到1分钟后<code>wallDeadline</code>立即执行，而<code>deadline</code>继续等待。</p>
+<p>好了，我们现在抛开前面的参数，使用<code>deadline</code>方法来做后面的例子。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> queue <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.queue&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建一个`DispatchWorkItem`</span></span><br><span class="line"><span class="keyword">let</span> workItem <span class="operator">=</span> <span class="type">DispatchWorkItem</span>(qos: .unspecified, flags: []) &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;queue.asyncAfter workItem&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">queue.asyncAfter(deadline: .now() <span class="operator">+</span> <span class="number">1</span>, execute: workItem)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 直接使用闭包去实现`asyncAfter`</span></span><br><span class="line">queue.asyncAfter(deadline: .now() <span class="operator">+</span> <span class="number">300</span>, qos: .unspecified, flags: []) &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;deadline&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>**qos: **参考<code>DispatchQueue</code>初始化方法中的<code>qos</code>参数</p>
+<p>**flags: **</p>
+<h3 id="concurrentPerform"><a href="#concurrentPerform" class="headerlink" title="concurrentPerform"></a>concurrentPerform</h3><p>在<code>Objective-C</code>中我们可以使用<code>dispatch_apply</code>这个方法做重复迭代的才做，swift3.0之后简化为<code>concurrentPerform</code>方法，我们看下面一个例子。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">DispatchQueue</span>.concurrentPerform(iterations: <span class="number">5</span>) &#123; idx <span class="keyword">in</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;DispatchQueue.concurrentPerform <span class="subst">\(idx)</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;main thread.&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>重复执行了五次，执行的index是无序的，并且阻塞了当前线程，只有<code>concurrentPerform</code>执行完成后才回继续后面的操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">DispatchQueue.concurrentPerform 2</span><br><span class="line">DispatchQueue.concurrentPerform 0</span><br><span class="line">DispatchQueue.concurrentPerform 3</span><br><span class="line">DispatchQueue.concurrentPerform 4</span><br><span class="line">DispatchQueue.concurrentPerform 1</span><br><span class="line">main thread.</span><br></pre></td></tr></table></figure>
+
+<h3 id="DispatchGroup"><a href="#DispatchGroup" class="headerlink" title="DispatchGroup"></a>DispatchGroup</h3><p><code>DispatchGroup</code>允许工作的聚合同步。您可以使用它们提交多个不同的工作项，并跟踪它们何时全部完成，即使它们可能运行在不同的队列上。当所有的任务都完成后获取到最后执行结果，<code>DispatchGroup</code>有两种不同的实现方式。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> queue1 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.queue.1&quot;</span>)</span><br><span class="line"><span class="keyword">let</span> queue2 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.queue.2&quot;</span>)</span><br><span class="line"><span class="keyword">let</span> group <span class="operator">=</span> <span class="type">DispatchGroup</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行第一个任务</span></span><br><span class="line">group.enter()</span><br><span class="line">queue1.async &#123;</span><br><span class="line">    sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;queue 1&quot;</span>)</span><br><span class="line">    group.leave()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行第二个任务</span></span><br><span class="line">group.enter()</span><br><span class="line">queue2.async &#123;</span><br><span class="line">    sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;queue 2&quot;</span>)</span><br><span class="line">    group.leave()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加任务完成监听</span></span><br><span class="line">group.notify(queue: .global(), execute: &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;group done&quot;</span>)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;main thread .&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>enter()</code>&amp;<code>leave()</code>不会阻塞当前执行线程，我们可以利用它完成多个多线程请求，完成后再进行下一步操作，比如访问多个请求，在所有请求完成之后再关闭<code>toast</code>或者弹窗<code>Alert</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">main thread .</span><br><span class="line">queue 2</span><br><span class="line">queue 1</span><br><span class="line">group done</span><br></pre></td></tr></table></figure>
+
+<p>和<code>enter()</code>&amp;<code>leave()</code>方式不一样的是<code>wait()</code>方式会阻塞当前线程，当我们使用<code>async(group: group)</code>进行操作时，我们需要使用<code>wait()</code>锁定当前线程，不然不会执行<code>notify</code>方法。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> queue1 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.queue.1&quot;</span>)</span><br><span class="line"><span class="keyword">let</span> queue2 <span class="operator">=</span> <span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.queue.2&quot;</span>)</span><br><span class="line"><span class="keyword">let</span> group <span class="operator">=</span> <span class="type">DispatchGroup</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行第一个任务</span></span><br><span class="line">queue1.async(group: group) &#123;</span><br><span class="line">    sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;queue 1&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行第二个任务</span></span><br><span class="line">queue2.async(group: group) &#123;</span><br><span class="line">    sleep(<span class="number">2</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;queue 2&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加任务完成监听</span></span><br><span class="line">group.notify(queue: .global(), execute: &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;group done&quot;</span>)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等待任务完成</span></span><br><span class="line">group.wait()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;main thread .&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>我们执行上述代码，可以得到结果，我们锁定了主线程，只有所有的操作结束之后才会执行主线程的代码。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">queue 1</span><br><span class="line">queue 2</span><br><span class="line">main thread .</span><br><span class="line">group done</span><br></pre></td></tr></table></figure>
+
+<p>###DispatchSemaphore</p>
+<p>信号量，用于控制并发访问资源的机制，可用于控制跨多个执行上下文对资源的访问。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> semaphore <span class="operator">=</span> <span class="type">DispatchSemaphore</span>(value: <span class="number">0</span>)</span><br><span class="line"><span class="type">DispatchQueue</span>(label: <span class="string">&quot;com.zevwings.queue&quot;</span>)</span><br><span class="line">    .async &#123;</span><br><span class="line">        <span class="keyword">for</span> <span class="keyword">_</span> <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">5</span> &#123;</span><br><span class="line">            sleep(<span class="number">1</span>)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;single&quot;</span>)</span><br><span class="line">            <span class="comment">// 发送信号</span></span><br><span class="line">            semaphore.signal()</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> idx <span class="keyword">in</span> <span class="number">0</span> <span class="operator">...</span> <span class="number">5</span> &#123;</span><br><span class="line">    <span class="comment">// 锁定访问，等待信号</span></span><br><span class="line">    semaphore.wait()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;output <span class="subst">\(idx)</span>&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;main thread .&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>我们锁死主线程，然后在子线程中发送信号，执行后面的代码，得到如下结果。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">single</span><br><span class="line">output 0</span><br><span class="line">single</span><br><span class="line">output 1</span><br><span class="line">single</span><br><span class="line">output 2</span><br><span class="line">single</span><br><span class="line">output 3</span><br><span class="line">single</span><br><span class="line">output 4</span><br><span class="line">single</span><br><span class="line">output 5</span><br><span class="line">main thread .</span><br></pre></td></tr></table></figure>
+
+<h2 id="dispatch-once"><a href="#dispatch-once" class="headerlink" title="dispatch_once"></a>dispatch_once</h2><p>在swift3.0之后对<code>GCD</code>移除了<code>dispathc_once</code>操作，我们可以通过拓展或者新创建一个类来实现这个操作，我们可以通过如下两种方式来实现代码只会调度一次代码块。</p>
+<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>创建一个分类实现，维护一个<code>_onceTracker</code>每次执行后将<code>token</code>添加到<code>_onceTracker</code>，每次执行<code>once</code>方法之前判断<code>token</code>是否在<code>_onceTracker</code>之中，如果存在，则不执行。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">extension</span> <span class="title class_">DispatchQueue</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">var</span> _onceTracker <span class="operator">=</span> [<span class="type">String</span>]()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/// Executes a block of code, associated with a unique token, only once.</span></span><br><span class="line">    <span class="comment">///  The code is thread safe and will only execute the code once even in the presence of multithreaded calls.</span></span><br><span class="line">    <span class="comment">///</span></span><br><span class="line">    <span class="comment">/// - Parameters:</span></span><br><span class="line">    <span class="comment">///   - token: A unique reverse DNS style name such as com.vectorform. or a GUID</span></span><br><span class="line">    <span class="comment">///   - block: Block to execute once</span></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">func</span> <span class="title class_">once</span>(<span class="title class_">token</span>: <span class="title class_">String</span>, <span class="title class_">block</span>:() -&gt; <span class="title class_">Void</span>) &#123;</span><br><span class="line">        objc_sync_enter(<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">defer</span> &#123; objc_sync_exit(<span class="keyword">self</span>) &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> _onceTracker.contains(token) &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        _onceTracker.append(token)</span><br><span class="line">        block()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/// Executes a block of code, associated with a unique token, only once.</span></span><br><span class="line">    <span class="comment">/// The code is thread safe and will only execute the code once even in the presence of multithreaded calls.</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">///</span></span><br><span class="line">    <span class="comment">/// - Parameters:</span></span><br><span class="line">    <span class="comment">///   - queue: Queue to excuete once</span></span><br><span class="line">    <span class="comment">///   - token: A unique reverse DNS style name such as com.vectorform. or a GUID</span></span><br><span class="line">    <span class="comment">///   - block: Block to execute once</span></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">func</span> <span class="title class_">once</span>(<span class="title class_">queue</span>: <span class="title class_">DispatchQueue</span>, <span class="title class_">token</span>: <span class="title class_">String</span>, <span class="title class_">block</span>:@<span class="title class_">escaping</span> () -&gt; <span class="title class_">Void</span>) &#123;</span><br><span class="line">        </span><br><span class="line">        objc_sync_enter(<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">defer</span> &#123; objc_sync_exit(<span class="keyword">self</span>) &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> _onceTracker.contains(token) &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        _onceTracker.append(token)</span><br><span class="line">        queue.async &#123;</span><br><span class="line">            block()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>我们一可以定义一个静态常量来保证代码只执行依次，具体实现如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">OnceClass</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> once: <span class="type">Void</span> <span class="operator">=</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;once&quot;</span>)</span><br><span class="line"></span><br><span class="line">    &#125;()   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><code>GCD</code>可以为我们的代码提供很多简洁的线程操作，我们这里只写到了一部分内容更多关于<code>GCD</code>的方法，欢迎讨论。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div id="copyright">
+  <p><a href="https://zevwings.github.io/2019/07/23/2019/07/23/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9AGCD/">https://zevwings.github.io/2019/07/23/2019/07/23/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9AGCD/</a></p>
+  <p>本作品采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可</p>
+</div>
+
+      
+      
+  <div id="article-tag">
+    <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GCD/" rel="tag">GCD</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Thread/" rel="tag">Thread</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li></ul>
+  </div>
+
+
+      
+        <div class="article-share-links">
+  <a href="https://twitter.com/intent/tweet?text=iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9AGCD&amp;url=https%3A%2F%2Fzevwings.github.io%2F2019%2F07%2F23%2F2019%2F07%2F23%2FiOS%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E6%2593%258D%25E4%25BD%259C%25EF%25BC%259AGCD%2F"
+    class="article-share-twitter" target="_blank" title="Twitter"></a>
+  <a href="https://www.facebook.com/sharer.php?u=https%3A%2F%2Fzevwings.github.io%2F2019%2F07%2F23%2F2019%2F07%2F23%2FiOS%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E6%2593%258D%25E4%25BD%259C%25EF%25BC%259AGCD%2F"
+    class="article-share-facebook" target="_blank" title="Facebook"></a>
+  ​<a href="http://pinterest.com/pin/create/button/?url=https%3A%2F%2Fzevwings.github.io%2F2019%2F07%2F23%2F2019%2F07%2F23%2FiOS%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E6%2593%258D%25E4%25BD%259C%25EF%25BC%259AGCD%2F"
+    class="article-share-pinterest" target="_blank" title="Pinterest"></a>
+  ​<a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fzevwings.github.io%2F2019%2F07%2F23%2F2019%2F07%2F23%2FiOS%25E5%25A4%259A%25E7%25BA%25BF%25E7%25A8%258B%25E6%2593%258D%25E4%25BD%259C%25EF%25BC%259AGCD%2F"
+    class="article-share-linkedin" target="_blank" title="LinkedIn"></a>
+</div>
+
+      
+    </footer>
+  </div>
+  
+    
+  <nav id="article-nav">
+    
+    
+      <a href="/2019/07/19/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSOperation/" id="article-nav-older" class="article-nav-link-wrap">
+        <h4 class="article-nav-caption">可能会喜欢</h4>
+        <div class="article-nav-title">iOS多线程操作：NSOperation</div>
+      </a>
+    
+  </nav>
+
+
+  
+</article>
+
+    
+      <div class="gitalk">
+  
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js" integrity="sha256-Pmj85ojLaPOWwRtlMJwmezB&#x2F;Qg8BzvJp5eTzvXaYAfA&#x3D;" crossorigin="anonymous"></script>
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt&#x2F;Hn&#x2F;PvYZde1iqfp8U&#x3D;" crossorigin="anonymous">
+
+  <div id="gitalk-container"></div>
+  <script type="text/javascript">
+    // eslint-disable-next-line no-undef
+    let gitalk = new Gitalk({
+      clientID: '3f4b1e6136130caf67a9',
+      clientSecret: '4da7fd6f1c47d93e4521e2bb53e49cc143d958ff',
+      id: window.location.pathname,
+      repo: 'zevwings.github.io',
+      owner: 'zevwings',
+      admin: 'zevwings',
+      distractionFreeMode: true
+    });
+
+    gitalk.render('gitalk-container');
+  </script>
+</div>
+
+    
+  </section>
+  <section class="post-sidebar">
+    <aside>
+  
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GCD/" rel="tag">GCD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/" rel="tag">Runtime</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Source-Code/" rel="tag">Source Code</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Thread/" rel="tag">Thread</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tools/" rel="tag">Tools</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vendors/" rel="tag">Vendors</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/" rel="tag">iOS</a><span class="tag-list-count">14</span></li></ul>
+    </div>
+  </div>
+
+
+  
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/07/23/2019/07/23/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9AGCD/">iOS多线程操作：GCD</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/19/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSOperation/">iOS多线程操作：NSOperation</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/19/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSThread/">iOS多线程操作：NSThread</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/18/2019/07/18/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%85%AD%EF%BC%89%EF%BC%9ANSObject%E5%8D%8F%E8%AE%AE/">ObjC 学习笔记（六）：NSObject协议</a>
+          </li>
+        
+          <li>
+            <a href="/2019/05/16/2019/05/16/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%94%EF%BC%89%EF%BC%9AMethod-Swizzling/">ObjC 学习笔记（五）：Method Swizzling</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="widget-wrap">
+  <h3 class="widget-title">
+    关于我
+  </h3>
+  <div class="widget">
+    <div class="profile">
+      <div class="motto">
+        
+          <p class="source"><span>花若盛开，蝴蝶自来</span></p>
+        
+        <div class="quote">&#10077;</div>
+        <p class="content">积累沉淀，不愧于心，不忘于行。</p>
+        <div class="close quote">&#10077;</div>
+      </div>
+      <div class="basic">
+        <div class="avatar"></div>
+        <div class="info">
+          <h2 class="name">zevwings</h2>
+          <h3 class="location">Chengdu</h3>
+        </div>
+      </div>
+      <div class="links">
+        
+          <a id="github-link" class="profile-link" target="_blank" rel="noopener" href="https://github.com/zevwings" title="GitHub"></a>
+        
+        
+          <a id="email-link" class="profile-link" href="mailto:zev.wings@gmail.com" title="邮箱"></a>
+        
+        
+          <a id="rss-link" class="profile-link" href="/atom.xml" title="RSS"></a>
+        
+      </div>
+    </div>
+    
+      <div class="holder">
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+      </div>
+    
+  </div>
+</div>
+
+</aside>
+
+  </section>
+</div>
+
+
+      <footer id="footer">
+  <p>Copyright &copy; 2022 zevwings</p>
+  <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> • Theme <a
+                href="https://github.com/DukeLuo/hexo-theme-candelas" target="_blank">Candelas</a></p>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories" class="mobile-nav-link">Category</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archive</a>
+  
+</nav>
+
+  </div>
+</body>
+</html>

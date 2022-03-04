@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="在阅读了类的结构、属性、方法交换、对象关联之后，我们可以看到，这些所有的所有操作都与object相关，在我们开发过程中，我们也可以看到很多类都继承自NSObject，比如：UIResponder，UINavigationItem等。 我们接下来看看NSObject的代码有些什么内容呢？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ObjC 学习笔记（六）：NSObject协议">
+<meta property="og:url" content="https://zevwings.github.io/2019/07/18/2019/07/18/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%85%AD%EF%BC%89%EF%BC%9ANSObject%E5%8D%8F%E8%AE%AE/index.html">
+<meta property="og:site_name" content="zevwings">
+<meta property="og:description" content="在阅读了类的结构、属性、方法交换、对象关联之后，我们可以看到，这些所有的所有操作都与object相关，在我们开发过程中，我们也可以看到很多类都继承自NSObject，比如：UIResponder，UINavigationItem等。 我们接下来看看NSObject的代码有些什么内容呢？">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-07-18T10:11:19.000Z">
+<meta property="article:modified_time" content="2019-11-04T01:07:53.000Z">
+<meta property="article:author" content="zevwings">
+<meta property="article:tag" content="iOS">
+<meta property="article:tag" content="Runtime">
+<meta property="article:tag" content="Source Code">
+<meta name="twitter:card" content="summary">
+  <title>ObjC 学习笔记（六）：NSObject协议 | zevwings</title>
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS&#x2F;woiFS3uNKo8eIuni59rjyNGtXfstRzStA&#x3D;" crossorigin="anonymous">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo&#x3D;" defer crossorigin="anonymous"></script>
+
+  
+  
+    
+<script src="/js/toc.js" defer></script>
+
+  
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@2.1.4/fingerprint2.min.js" defer></script>
+
+    
+<script src="/js/fingerprint.js" defer></script>
+
+    
+<script src="/js/gist.js" defer></script>
+
+    
+<script src="/js/like.js" defer type="module"></script>
+
+  
+  
+<script src="/js/script.js" defer></script>
+
+  
+<script src="/js/search.js" defer></script>
+
+  
+<script src="/js/chocolate.js" defer></script>
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP&#x2F;HTHLT7097U8Y5b8&#x3D;" crossorigin="anonymous" defer></script>
+
+  
+  
+  
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header" class="post-header">
+    <div id="header-inner">
+        <nav id="main-nav">
+            <a id="main-nav-toggle" class="nav-icon"></a>
+            
+                <a class="main-nav-link" href="/">Home</a>
+            
+                <a class="main-nav-link" href="/categories">Category</a>
+            
+                <a class="main-nav-link" href="/archives">Archive</a>
+            
+        </nav>
+        <nav id="sub-nav">
+            <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+        </nav>
+        <div id="search-form-wrap">
+            <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://zevwings.github.io"></form>
+        </div>
+    </div>
+</header>
+
+      <div class="post-outer" data-post-title="ObjC 学习笔记（六）：NSObject协议" id="post">
+  <section class="post-toc">
+    <aside class="post-fixed-container">
+  <div class="toc-wrap">
+  <h3 class="toc-title">目录</h3>
+  
+</div>
+
+  
+    <div id="post-like" data-token="Z2hwX0V5NnU3UjU5UjRiMktFNlJhbDRnR29DbmZzTmJONDBXZkpmSQ==">
+  <div class="container">
+    <a class="like-icon"></a>
+    <span id="like-count"></span>
+  </div>
+</div>
+
+  
+</aside>
+
+  </section>
+  <section class="post-main">
+    <article id="post-2019/07/18/ObjC-学习笔记（六）：NSObject协议" class="h-entry article article-type-post"
+  itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <p class="article-date">
+  <time class="dt-published" datetime="2019-07-18T10:11:19.000Z" itemprop="datePublished">2019-07-18</time>
+</p>
+
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Runtime/">Runtime</a>
+  </div>
+
+
+  </div>
+  <div class="article-inner">
+    
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      ObjC 学习笔记（六）：NSObject协议
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>在阅读了类的结构、属性、方法交换、对象关联之后，我们可以看到，这些所有的所有操作都与<code>object</code>相关，在我们开发过程中，我们也可以看到很多类都继承自<code>NSObject</code>，比如：<code>UIResponder</code>，<code>UINavigationItem</code>等。</p>
+<p>我们接下来看看<code>NSObject</code>的代码有些什么内容呢？</p>
+<span id="more"></span>
+
+<p>首先是<code>NSObject</code>协议，包含了<code>NSObject</code>相关的抽象，都是我们平常会使用到的一些方法。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">NSObject</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)isEqual:(<span class="keyword">id</span>)object;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">readonly</span>) <span class="built_in">NSUInteger</span> hash;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">readonly</span>) Class superclass;</span><br><span class="line">- (Class)<span class="keyword">class</span> OBJC_SWIFT_UNAVAILABLE(<span class="string">&quot;use &#x27;type(of: anObject)&#x27; instead&quot;</span>);</span><br><span class="line">- (<span class="keyword">instancetype</span>)<span class="keyword">self</span>;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">id</span>)performSelector:(SEL)aSelector;</span><br><span class="line">- (<span class="keyword">id</span>)performSelector:(SEL)aSelector withObject:(<span class="keyword">id</span>)object;</span><br><span class="line">- (<span class="keyword">id</span>)performSelector:(SEL)aSelector withObject:(<span class="keyword">id</span>)object1 withObject:(<span class="keyword">id</span>)object2;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)isProxy;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)isKindOfClass:(Class)aClass;</span><br><span class="line">- (<span class="built_in">BOOL</span>)isMemberOfClass:(Class)aClass;</span><br><span class="line">- (<span class="built_in">BOOL</span>)conformsToProtocol:(Protocol *)aProtocol;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)respondsToSelector:(SEL)aSelector;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)<span class="keyword">retain</span> OBJC_ARC_UNAVAILABLE;</span><br><span class="line">- (<span class="keyword">oneway</span> <span class="keyword">void</span>)release OBJC_ARC_UNAVAILABLE;</span><br><span class="line">- (<span class="keyword">instancetype</span>)autorelease OBJC_ARC_UNAVAILABLE;</span><br><span class="line">- (<span class="built_in">NSUInteger</span>)retainCount OBJC_ARC_UNAVAILABLE;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">struct</span> _NSZone *)zone OBJC_ARC_UNAVAILABLE;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">readonly</span>, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *description;</span><br><span class="line"><span class="keyword">@optional</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">readonly</span>, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *debugDescription;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span>	</span><br></pre></td></tr></table></figure>
+
+<p><code>NSObject</code>协议定义了<code>Objective-C</code>对象公用的相关方法，我们大多时候都会将<code>NSObject</code>作为我们的基类， 其实我们也可以使用<code>NSObject</code>自己实现一个基类，现在我们跟着<code>NSObject</code>协议去看看<code>NSObject</code>怎么实现的基类。</p>
+<p>首先我们看看对象相关的方法。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">id</span>)<span class="keyword">self</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">id</span>)<span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">id</span>)<span class="keyword">self</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (Class)<span class="keyword">class</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (Class)<span class="keyword">class</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> object_getClass(<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (Class)superclass &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>-&gt;superclass;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (Class)superclass &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">self</span> <span class="keyword">class</span>]-&gt;superclass;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这些方法方法我们可以看出来都是获取对象自己及父类<code>class</code>相关的实现。我们先定义一个<code>SubClass</code>来输出这几个方法获取的结果。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">SubClass</span> : <span class="title">NSObject</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">SubClass</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>然后初始化<code>SubClass</code>并打印相关方法的结果，可以获得如下结果。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[obj <span class="keyword">self</span>] : &lt;SubClass: <span class="number">0x600001a980a0</span>&gt;</span><br><span class="line">[obj <span class="keyword">class</span>] : SubClass</span><br><span class="line">[SubClass <span class="keyword">self</span>] : SubClass</span><br><span class="line">[SubClass <span class="keyword">class</span>] : SubClass</span><br><span class="line">[obj superclass] : <span class="built_in">NSObject</span></span><br><span class="line">[SubClass superclass] : <span class="built_in">NSObject</span></span><br></pre></td></tr></table></figure>
+
+<p>从这些方法中我们可以得出结果：</p>
+<p><code>[obj self]</code>获取当前对象，查找当前对象的引用地址；</p>
+<p><code>[obj class]</code>获取当前对象的引用类型，获取当前类的的引用类型；</p>
+<p><code>[SubClass self] </code>和&#96;&#96;[SubClass class] &#96;都是获取当前的引用类型，查找当前类的引用类型对象；</p>
+<p><code>[obj superclass]</code>和<code>[SubClass superclass]</code>都是获取父类的引用类型。</p>
+<p>我们再看看我们常用来判断<code>子类</code>、<code>父类</code>、是否为当前类的成员对象的方法，由于这些方法十分简单，我就将对应的描述放到注释里面。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 判断当前类是否等于目标类</span></span><br><span class="line">+ (<span class="built_in">BOOL</span>)isMemberOfClass:(Class)cls &#123;</span><br><span class="line">    <span class="keyword">return</span> object_getClass((<span class="keyword">id</span>)<span class="keyword">self</span>) == cls;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断当前对象的引用类型是否是目标类的成员对象</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)isMemberOfClass:(Class)cls &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">self</span> <span class="keyword">class</span>] == cls;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 遍历判断当前类是否是目标类的子类</span></span><br><span class="line">+ (<span class="built_in">BOOL</span>)isKindOfClass:(Class)cls &#123;</span><br><span class="line">    <span class="keyword">for</span> (Class tcls = object_getClass((<span class="keyword">id</span>)<span class="keyword">self</span>); tcls; tcls = tcls-&gt;superclass) &#123;</span><br><span class="line">        <span class="keyword">if</span> (tcls == cls) <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断当前类是否是目标类的子类成员对象</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)isKindOfClass:(Class)cls &#123;</span><br><span class="line">    <span class="keyword">for</span> (Class tcls = [<span class="keyword">self</span> <span class="keyword">class</span>]; tcls; tcls = tcls-&gt;superclass) &#123;</span><br><span class="line">        <span class="keyword">if</span> (tcls == cls) <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断当前类是否是目标类的子类</span></span><br><span class="line">+ (<span class="built_in">BOOL</span>)isSubclassOfClass:(Class)cls &#123;</span><br><span class="line">    <span class="keyword">for</span> (Class tcls = <span class="keyword">self</span>; tcls; tcls = tcls-&gt;superclass) &#123;</span><br><span class="line">        <span class="keyword">if</span> (tcls == cls) <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断当前类是否是目标对象的父类</span></span><br><span class="line">+ (<span class="built_in">BOOL</span>)isAncestorOfObject:(<span class="built_in">NSObject</span> *)obj &#123;</span><br><span class="line">    <span class="keyword">for</span> (Class tcls = [obj <span class="keyword">class</span>]; tcls; tcls = tcls-&gt;superclass) &#123;</span><br><span class="line">        <span class="keyword">if</span> (tcls == <span class="keyword">self</span>) <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们有时会在代码中判断某个类是否实现某一个协议会使用到<code>conformsToProtocol</code>去判断是否实现了某个协议，会循环遍历父类，然后调用<code>class_conformsToProtocol</code>去判断是否实现了这个协议。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="built_in">BOOL</span>)conformsToProtocol:(Protocol *)protocol &#123;</span><br><span class="line">    <span class="keyword">if</span> (!protocol) <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">for</span> (Class tcls = <span class="keyword">self</span>; tcls; tcls = tcls-&gt;superclass) &#123;</span><br><span class="line">        <span class="keyword">if</span> (class_conformsToProtocol(tcls, protocol)) <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)conformsToProtocol:(Protocol *)protocol &#123;</span><br><span class="line">    <span class="keyword">if</span> (!protocol) <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">for</span> (Class tcls = [<span class="keyword">self</span> <span class="keyword">class</span>]; tcls; tcls = tcls-&gt;superclass) &#123;</span><br><span class="line">        <span class="keyword">if</span> (class_conformsToProtocol(tcls, protocol)) <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">BOOL</span> class_conformsToProtocol(Class cls, Protocol *proto_gen)</span><br><span class="line">&#123;</span><br><span class="line">    protocol_t *proto = newprotocol(proto_gen);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (!cls) <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">if</span> (!proto_gen) <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line"></span><br><span class="line">    mutex_locker_t lock(runtimeLock);</span><br><span class="line"></span><br><span class="line">    checkIsKnownClass(cls);</span><br><span class="line">    </span><br><span class="line">    assert(cls-&gt;isRealized());</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> auto&amp; proto_ref : cls-&gt;data()-&gt;protocols) &#123;</span><br><span class="line">        protocol_t *p = remapProtocol(proto_ref);</span><br><span class="line">        <span class="keyword">if</span> (p == proto || protocol_conformsToProtocol_nolock(p, proto)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们经常会在使用代理的时候看到一段代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([_delegate respondsToSelector:<span class="keyword">@selector</span>(xxx:)]&#123;</span><br><span class="line">	[_delegate xxx];</span><br><span class="line">&#125;	</span><br></pre></td></tr></table></figure>
+
+<p>然后我们再看看<code>NSObject</code>里面<code>respondsToSelector</code>默认实现是什么样的呢？</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="built_in">BOOL</span>)instancesRespondToSelector:(SEL)sel &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">return</span> class_respondsToSelector(<span class="keyword">self</span>, sel);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="built_in">BOOL</span>)respondsToSelector:(SEL)sel &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">return</span> class_respondsToSelector_inst(object_getClass(<span class="keyword">self</span>), sel, <span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)respondsToSelector:(SEL)sel &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    <span class="keyword">return</span> class_respondsToSelector_inst([<span class="keyword">self</span> <span class="keyword">class</span>], sel, <span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用<code>respondsToSelector</code>会转发给<code>class_respondsToSelector_inst</code>方法去查找这个<code>Selector</code>的<code>IMP</code>来判断当前类是否实现<code>xxx</code>方法，<code>instancesRespondToSelector</code>也是通过<code>class_respondsToSelector</code>转发给<code>class_respondsToSelector_inst</code>方法。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// inst is an instance of cls or a subclass thereof, or nil if none is known.</span></span><br><span class="line"><span class="comment">// Non-nil inst is faster in some cases. See lookUpImpOrForward() for details.</span></span><br><span class="line"><span class="keyword">bool</span> class_respondsToSelector_inst(Class cls, SEL sel, <span class="keyword">id</span> inst)</span><br><span class="line">&#123;</span><br><span class="line">    IMP imp;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!sel  ||  !cls) <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Avoids +initialize because it historically did so.</span></span><br><span class="line">    <span class="comment">// We&#x27;re not returning a callable IMP anyway.</span></span><br><span class="line">    imp = lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                         <span class="literal">NO</span><span class="comment">/*initialize*/</span>, <span class="literal">YES</span><span class="comment">/*cache*/</span>, <span class="literal">YES</span><span class="comment">/*resolver*/</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">bool</span>(imp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于<code>performSelector</code>这个用来执行方法的函数我们也经常回事用到，这个函数主要调用<code>objc_msgSend</code>进行消息转发，具体实现在<code>objc_msgSend</code>部分再详细学习。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">id</span>)performSelector:(SEL)sel &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) [<span class="keyword">self</span> doesNotRecognizeSelector:sel];</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">id</span>(*)(<span class="keyword">id</span>, SEL))objc_msgSend)((<span class="keyword">id</span>)<span class="keyword">self</span>, sel);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">id</span>)performSelector:(SEL)sel withObject:(<span class="keyword">id</span>)obj &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) [<span class="keyword">self</span> doesNotRecognizeSelector:sel];</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">id</span>(*)(<span class="keyword">id</span>, SEL, <span class="keyword">id</span>))objc_msgSend)((<span class="keyword">id</span>)<span class="keyword">self</span>, sel, obj);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">id</span>)performSelector:(SEL)sel withObject:(<span class="keyword">id</span>)obj1 withObject:(<span class="keyword">id</span>)obj2 &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) [<span class="keyword">self</span> doesNotRecognizeSelector:sel];</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">id</span>(*)(<span class="keyword">id</span>, SEL, <span class="keyword">id</span>, <span class="keyword">id</span>))objc_msgSend)((<span class="keyword">id</span>)<span class="keyword">self</span>, sel, obj1, obj2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">id</span>)performSelector:(SEL)sel &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) [<span class="keyword">self</span> doesNotRecognizeSelector:sel];</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">id</span>(*)(<span class="keyword">id</span>, SEL))objc_msgSend)(<span class="keyword">self</span>, sel);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">id</span>)performSelector:(SEL)sel withObject:(<span class="keyword">id</span>)obj &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) [<span class="keyword">self</span> doesNotRecognizeSelector:sel];</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">id</span>(*)(<span class="keyword">id</span>, SEL, <span class="keyword">id</span>))objc_msgSend)(<span class="keyword">self</span>, sel, obj);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">id</span>)performSelector:(SEL)sel withObject:(<span class="keyword">id</span>)obj1 withObject:(<span class="keyword">id</span>)obj2 &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) [<span class="keyword">self</span> doesNotRecognizeSelector:sel];</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">id</span>(*)(<span class="keyword">id</span>, SEL, <span class="keyword">id</span>, <span class="keyword">id</span>))objc_msgSend)(<span class="keyword">self</span>, sel, obj1, obj2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们经常会使用到<code>isEqualXX</code>来对比两个对象是否相等，为什么不用<code>isEqual</code>或则<code>==</code>呢，我们来看看<code>isEqual</code>的实现，从实现来看我们可以发现方法是对比两个对象是否相等，而对于<code>NSString</code>或者<code>NSArray</code>的成员对象来说，我们需要判断它们的值是否相等而不是地址是否相等，否则很容易出现地址一致而值不一致的问题。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="built_in">BOOL</span>)isEqual:(<span class="keyword">id</span>)obj &#123;</span><br><span class="line">    <span class="keyword">return</span> obj == (<span class="keyword">id</span>)<span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)isEqual:(<span class="keyword">id</span>)obj &#123;</span><br><span class="line">    <span class="keyword">return</span> obj == <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们经常会使用hash判断两个对象是否相等，在<code>NSObject</code>里面默认返回当前类的地址<code>hash</code>值。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">+ (NSUInteger)hash &#123;</span><br><span class="line">    return _objc_rootHash(self);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (NSUInteger)hash &#123;</span><br><span class="line">    return _objc_rootHash(self);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">uintptr_t</span><br><span class="line">_objc_rootHash(id obj)</span><br><span class="line">&#123;</span><br><span class="line">    return (uintptr_t)obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们经常都会使用<code>NSLog(@&quot;obj : %@&quot;, obj);</code>来输出某个对象查看相关的属性，我们可以通过重写<code>description</code>方法来自定义对象的输出。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Replaced by CF (returns an NSString)</span></span><br><span class="line">+ (<span class="built_in">NSString</span> *)description &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Replaced by CF (returns an NSString)</span></span><br><span class="line">- (<span class="built_in">NSString</span> *)description &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="built_in">NSString</span> *)debugDescription &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">self</span> description];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">NSString</span> *)debugDescription &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">self</span> description];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至此，<code>NSObject</code>协议的默认实现基本上就介绍完了，<code>NSObject</code>剩下的大多数方法都是作为父类方法，用于后面方法实现，就不再一一介绍了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div id="copyright">
+  <p><a href="https://zevwings.github.io/2019/07/18/2019/07/18/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%85%AD%EF%BC%89%EF%BC%9ANSObject%E5%8D%8F%E8%AE%AE/">https://zevwings.github.io/2019/07/18/2019/07/18/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%85%AD%EF%BC%89%EF%BC%9ANSObject%E5%8D%8F%E8%AE%AE/</a></p>
+  <p>本作品采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可</p>
+</div>
+
+      
+      
+  <div id="article-tag">
+    <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Runtime/" rel="tag">Runtime</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Source-Code/" rel="tag">Source Code</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li></ul>
+  </div>
+
+
+      
+        <div class="article-share-links">
+  <a href="https://twitter.com/intent/tweet?text=ObjC%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%85%AD%EF%BC%89%EF%BC%9ANSObject%E5%8D%8F%E8%AE%AE&amp;url=https%3A%2F%2Fzevwings.github.io%2F2019%2F07%2F18%2F2019%2F07%2F18%2FObjC-%25E5%25AD%25A6%25E4%25B9%25A0%25E7%25AC%2594%25E8%25AE%25B0%25EF%25BC%2588%25E5%2585%25AD%25EF%25BC%2589%25EF%25BC%259ANSObject%25E5%258D%258F%25E8%25AE%25AE%2F"
+    class="article-share-twitter" target="_blank" title="Twitter"></a>
+  <a href="https://www.facebook.com/sharer.php?u=https%3A%2F%2Fzevwings.github.io%2F2019%2F07%2F18%2F2019%2F07%2F18%2FObjC-%25E5%25AD%25A6%25E4%25B9%25A0%25E7%25AC%2594%25E8%25AE%25B0%25EF%25BC%2588%25E5%2585%25AD%25EF%25BC%2589%25EF%25BC%259ANSObject%25E5%258D%258F%25E8%25AE%25AE%2F"
+    class="article-share-facebook" target="_blank" title="Facebook"></a>
+  ​<a href="http://pinterest.com/pin/create/button/?url=https%3A%2F%2Fzevwings.github.io%2F2019%2F07%2F18%2F2019%2F07%2F18%2FObjC-%25E5%25AD%25A6%25E4%25B9%25A0%25E7%25AC%2594%25E8%25AE%25B0%25EF%25BC%2588%25E5%2585%25AD%25EF%25BC%2589%25EF%25BC%259ANSObject%25E5%258D%258F%25E8%25AE%25AE%2F"
+    class="article-share-pinterest" target="_blank" title="Pinterest"></a>
+  ​<a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fzevwings.github.io%2F2019%2F07%2F18%2F2019%2F07%2F18%2FObjC-%25E5%25AD%25A6%25E4%25B9%25A0%25E7%25AC%2594%25E8%25AE%25B0%25EF%25BC%2588%25E5%2585%25AD%25EF%25BC%2589%25EF%25BC%259ANSObject%25E5%258D%258F%25E8%25AE%25AE%2F"
+    class="article-share-linkedin" target="_blank" title="LinkedIn"></a>
+</div>
+
+      
+    </footer>
+  </div>
+  
+    
+  <nav id="article-nav">
+    
+      <a href="/2019/07/19/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSThread/" id="article-nav-newer" class="article-nav-link-wrap">
+        <h4 class="article-nav-caption">阅读下一篇</h4>
+        <div class="article-nav-title">iOS多线程操作：NSThread</div>
+      </a>
+    
+    
+      <a href="/2019/05/16/2019/05/16/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%94%EF%BC%89%EF%BC%9AMethod-Swizzling/" id="article-nav-older" class="article-nav-link-wrap">
+        <h4 class="article-nav-caption">可能会喜欢</h4>
+        <div class="article-nav-title">ObjC 学习笔记（五）：Method Swizzling</div>
+      </a>
+    
+  </nav>
+
+
+  
+</article>
+
+    
+      <div class="gitalk">
+  
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js" integrity="sha256-Pmj85ojLaPOWwRtlMJwmezB&#x2F;Qg8BzvJp5eTzvXaYAfA&#x3D;" crossorigin="anonymous"></script>
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt&#x2F;Hn&#x2F;PvYZde1iqfp8U&#x3D;" crossorigin="anonymous">
+
+  <div id="gitalk-container"></div>
+  <script type="text/javascript">
+    // eslint-disable-next-line no-undef
+    let gitalk = new Gitalk({
+      clientID: '3f4b1e6136130caf67a9',
+      clientSecret: '4da7fd6f1c47d93e4521e2bb53e49cc143d958ff',
+      id: window.location.pathname,
+      repo: 'zevwings.github.io',
+      owner: 'zevwings',
+      admin: 'zevwings',
+      distractionFreeMode: true
+    });
+
+    gitalk.render('gitalk-container');
+  </script>
+</div>
+
+    
+  </section>
+  <section class="post-sidebar">
+    <aside>
+  
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GCD/" rel="tag">GCD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/" rel="tag">Runtime</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Source-Code/" rel="tag">Source Code</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Thread/" rel="tag">Thread</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tools/" rel="tag">Tools</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vendors/" rel="tag">Vendors</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/" rel="tag">iOS</a><span class="tag-list-count">14</span></li></ul>
+    </div>
+  </div>
+
+
+  
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/07/23/2019/07/23/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9AGCD/">iOS多线程操作：GCD</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/19/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSOperation/">iOS多线程操作：NSOperation</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/19/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSThread/">iOS多线程操作：NSThread</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/18/2019/07/18/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%85%AD%EF%BC%89%EF%BC%9ANSObject%E5%8D%8F%E8%AE%AE/">ObjC 学习笔记（六）：NSObject协议</a>
+          </li>
+        
+          <li>
+            <a href="/2019/05/16/2019/05/16/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%94%EF%BC%89%EF%BC%9AMethod-Swizzling/">ObjC 学习笔记（五）：Method Swizzling</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="widget-wrap">
+  <h3 class="widget-title">
+    关于我
+  </h3>
+  <div class="widget">
+    <div class="profile">
+      <div class="motto">
+        
+          <p class="source"><span>花若盛开，蝴蝶自来</span></p>
+        
+        <div class="quote">&#10077;</div>
+        <p class="content">积累沉淀，不愧于心，不忘于行。</p>
+        <div class="close quote">&#10077;</div>
+      </div>
+      <div class="basic">
+        <div class="avatar"></div>
+        <div class="info">
+          <h2 class="name">zevwings</h2>
+          <h3 class="location">Chengdu</h3>
+        </div>
+      </div>
+      <div class="links">
+        
+          <a id="github-link" class="profile-link" target="_blank" rel="noopener" href="https://github.com/zevwings" title="GitHub"></a>
+        
+        
+          <a id="email-link" class="profile-link" href="mailto:zev.wings@gmail.com" title="邮箱"></a>
+        
+        
+          <a id="rss-link" class="profile-link" href="/atom.xml" title="RSS"></a>
+        
+      </div>
+    </div>
+    
+      <div class="holder">
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+      </div>
+    
+  </div>
+</div>
+
+</aside>
+
+  </section>
+</div>
+
+
+      <footer id="footer">
+  <p>Copyright &copy; 2022 zevwings</p>
+  <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> • Theme <a
+                href="https://github.com/DukeLuo/hexo-theme-candelas" target="_blank">Candelas</a></p>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories" class="mobile-nav-link">Category</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archive</a>
+  
+</nav>
+
+  </div>
+</body>
+</html>

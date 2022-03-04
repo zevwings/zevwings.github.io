@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="FFmpeg是一套可以用来记录、转换数字音频、视频，并能将其转化为流的开源计算机程序。采用LGPL或GPL许可证。它提供了录制、转换以及流化音视频的完整解决方案。它包含了非常先进的音频&#x2F;视频编解码库libavcodec，为了保证高可移植性和编解码质量，libavcodec里很多code都是从头开发的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="macOS下编译ffmpeg">
+<meta property="og:url" content="https://zevwings.github.io/2018/08/16/2018/08/16/macOS%E4%B8%8B%E7%BC%96%E8%AF%91ffmpeg/index.html">
+<meta property="og:site_name" content="zevwings">
+<meta property="og:description" content="FFmpeg是一套可以用来记录、转换数字音频、视频，并能将其转化为流的开源计算机程序。采用LGPL或GPL许可证。它提供了录制、转换以及流化音视频的完整解决方案。它包含了非常先进的音频&#x2F;视频编解码库libavcodec，为了保证高可移植性和编解码质量，libavcodec里很多code都是从头开发的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-08-16T05:59:42.000Z">
+<meta property="article:modified_time" content="2019-11-04T01:07:53.000Z">
+<meta property="article:author" content="zevwings">
+<meta property="article:tag" content="iOS">
+<meta property="article:tag" content="Vendors">
+<meta name="twitter:card" content="summary">
+  <title>macOS下编译ffmpeg | zevwings</title>
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS&#x2F;woiFS3uNKo8eIuni59rjyNGtXfstRzStA&#x3D;" crossorigin="anonymous">
+
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo&#x3D;" defer crossorigin="anonymous"></script>
+
+  
+  
+    
+<script src="/js/toc.js" defer></script>
+
+  
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@2.1.4/fingerprint2.min.js" defer></script>
+
+    
+<script src="/js/fingerprint.js" defer></script>
+
+    
+<script src="/js/gist.js" defer></script>
+
+    
+<script src="/js/like.js" defer type="module"></script>
+
+  
+  
+<script src="/js/script.js" defer></script>
+
+  
+<script src="/js/search.js" defer></script>
+
+  
+<script src="/js/chocolate.js" defer></script>
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP&#x2F;HTHLT7097U8Y5b8&#x3D;" crossorigin="anonymous" defer></script>
+
+  
+  
+  
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header" class="post-header">
+    <div id="header-inner">
+        <nav id="main-nav">
+            <a id="main-nav-toggle" class="nav-icon"></a>
+            
+                <a class="main-nav-link" href="/">Home</a>
+            
+                <a class="main-nav-link" href="/categories">Category</a>
+            
+                <a class="main-nav-link" href="/archives">Archive</a>
+            
+        </nav>
+        <nav id="sub-nav">
+            <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+        </nav>
+        <div id="search-form-wrap">
+            <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://zevwings.github.io"></form>
+        </div>
+    </div>
+</header>
+
+      <div class="post-outer" data-post-title="macOS下编译ffmpeg" id="post">
+  <section class="post-toc">
+    <aside class="post-fixed-container">
+  <div class="toc-wrap">
+  <h3 class="toc-title">目录</h3>
+  
+</div>
+
+  
+    <div id="post-like" data-token="Z2hwX0V5NnU3UjU5UjRiMktFNlJhbDRnR29DbmZzTmJONDBXZkpmSQ==">
+  <div class="container">
+    <a class="like-icon"></a>
+    <span id="like-count"></span>
+  </div>
+</div>
+
+  
+</aside>
+
+  </section>
+  <section class="post-main">
+    <article id="post-2018/08/16/macOS下编译ffmpeg" class="h-entry article article-type-post"
+  itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <p class="article-date">
+  <time class="dt-published" datetime="2018-08-16T05:59:42.000Z" itemprop="datePublished">2018-08-16</time>
+</p>
+
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Tools/">Tools</a>
+  </div>
+
+
+  </div>
+  <div class="article-inner">
+    
+
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      macOS下编译ffmpeg
+    </h1>
+  
+
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>FFmpeg是一套可以用来记录、转换数字音频、视频，并能将其转化为流的开源计算机程序。采用LGPL或GPL许可证。它提供了录制、转换以及流化音视频的完整解决方案。它包含了非常先进的音频&#x2F;视频编解码库libavcodec，为了保证高可移植性和编解码质量，libavcodec里很多code都是从头开发的。</p>
+<span id="more"></span>
+
+<p>下面我们看一下Mac OS 下如何编译 iOS版本的FFmpeg</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1. 安装 yasm</span><br><span class="line">2. 下载 https://github.com/kewlbear/FFmpeg-iOS-build-script</span><br><span class="line">3. 执行 build-ffmpeg.sh</span><br><span class="line">4. done.</span><br><span class="line">5. 输入 ./build-ffmpeg.sh lipo</span><br><span class="line">6. 把ffmpeg-iOS文件加入到工程中</span><br><span class="line">7. 添加一个头文件引用 #include &quot;avformat.h&quot;</span><br><span class="line">8. 添加一个api语句：av_register_all();给一个类文件.m后缀改为.mm，开启混编模式。</span><br></pre></td></tr></table></figure>
+<p>其他注意细节</p>
+<ol>
+<li>编译的时候报错： ‘libavcodec&#x2F;avcodec.h’ file not found ，修改Header search paths 里的路径：$(PROJECT_DIR)&#x2F;FFmpeg-iOS&#x2F;include</li>
+<li>加入External libraries：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. libz.dylib</span><br><span class="line">2. libbz2.dylib</span><br><span class="line">3. libiconv.dylib</span><br><span class="line">4. AudioToolbox.framework</span><br><span class="line">5. CoreMedia.framework</span><br><span class="line">6. AVFoundation.framework</span><br><span class="line">7. VedioToolbox.framework</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div id="copyright">
+  <p><a href="https://zevwings.github.io/2018/08/16/2018/08/16/macOS%E4%B8%8B%E7%BC%96%E8%AF%91ffmpeg/">https://zevwings.github.io/2018/08/16/2018/08/16/macOS%E4%B8%8B%E7%BC%96%E8%AF%91ffmpeg/</a></p>
+  <p>本作品采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可</p>
+</div>
+
+      
+      
+  <div id="article-tag">
+    <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vendors/" rel="tag">Vendors</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li></ul>
+  </div>
+
+
+      
+        <div class="article-share-links">
+  <a href="https://twitter.com/intent/tweet?text=macOS%E4%B8%8B%E7%BC%96%E8%AF%91ffmpeg&amp;url=https%3A%2F%2Fzevwings.github.io%2F2018%2F08%2F16%2F2018%2F08%2F16%2FmacOS%25E4%25B8%258B%25E7%25BC%2596%25E8%25AF%2591ffmpeg%2F"
+    class="article-share-twitter" target="_blank" title="Twitter"></a>
+  <a href="https://www.facebook.com/sharer.php?u=https%3A%2F%2Fzevwings.github.io%2F2018%2F08%2F16%2F2018%2F08%2F16%2FmacOS%25E4%25B8%258B%25E7%25BC%2596%25E8%25AF%2591ffmpeg%2F"
+    class="article-share-facebook" target="_blank" title="Facebook"></a>
+  ​<a href="http://pinterest.com/pin/create/button/?url=https%3A%2F%2Fzevwings.github.io%2F2018%2F08%2F16%2F2018%2F08%2F16%2FmacOS%25E4%25B8%258B%25E7%25BC%2596%25E8%25AF%2591ffmpeg%2F"
+    class="article-share-pinterest" target="_blank" title="Pinterest"></a>
+  ​<a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fzevwings.github.io%2F2018%2F08%2F16%2F2018%2F08%2F16%2FmacOS%25E4%25B8%258B%25E7%25BC%2596%25E8%25AF%2591ffmpeg%2F"
+    class="article-share-linkedin" target="_blank" title="LinkedIn"></a>
+</div>
+
+      
+    </footer>
+  </div>
+  
+    
+  <nav id="article-nav">
+    
+      <a href="/2019/04/09/2019/04/09/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9A%E4%B9%89/" id="article-nav-newer" class="article-nav-link-wrap">
+        <h4 class="article-nav-caption">阅读下一篇</h4>
+        <div class="article-nav-title">ObjC 学习笔记（一）：数据结构定义</div>
+      </a>
+    
+    
+      <a href="/2018/08/16/2018/08/16/Cocoapods%E5%B0%8F%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/" id="article-nav-older" class="article-nav-link-wrap">
+        <h4 class="article-nav-caption">可能会喜欢</h4>
+        <div class="article-nav-title">Cocoapods小记（二）</div>
+      </a>
+    
+  </nav>
+
+
+  
+</article>
+
+    
+      <div class="gitalk">
+  
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js" integrity="sha256-Pmj85ojLaPOWwRtlMJwmezB&#x2F;Qg8BzvJp5eTzvXaYAfA&#x3D;" crossorigin="anonymous"></script>
+
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt&#x2F;Hn&#x2F;PvYZde1iqfp8U&#x3D;" crossorigin="anonymous">
+
+  <div id="gitalk-container"></div>
+  <script type="text/javascript">
+    // eslint-disable-next-line no-undef
+    let gitalk = new Gitalk({
+      clientID: '3f4b1e6136130caf67a9',
+      clientSecret: '4da7fd6f1c47d93e4521e2bb53e49cc143d958ff',
+      id: window.location.pathname,
+      repo: 'zevwings.github.io',
+      owner: 'zevwings',
+      admin: 'zevwings',
+      distractionFreeMode: true
+    });
+
+    gitalk.render('gitalk-container');
+  </script>
+</div>
+
+    
+  </section>
+  <section class="post-sidebar">
+    <aside>
+  
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GCD/" rel="tag">GCD</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime/" rel="tag">Runtime</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Source-Code/" rel="tag">Source Code</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Thread/" rel="tag">Thread</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tools/" rel="tag">Tools</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vendors/" rel="tag">Vendors</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/" rel="tag">iOS</a><span class="tag-list-count">14</span></li></ul>
+    </div>
+  </div>
+
+
+  
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/07/23/2019/07/23/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9AGCD/">iOS多线程操作：GCD</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/19/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSOperation/">iOS多线程操作：NSOperation</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/19/2019/07/19/iOS%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%93%8D%E4%BD%9C%EF%BC%9ANSThread/">iOS多线程操作：NSThread</a>
+          </li>
+        
+          <li>
+            <a href="/2019/07/18/2019/07/18/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%85%AD%EF%BC%89%EF%BC%9ANSObject%E5%8D%8F%E8%AE%AE/">ObjC 学习笔记（六）：NSObject协议</a>
+          </li>
+        
+          <li>
+            <a href="/2019/05/16/2019/05/16/ObjC-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%94%EF%BC%89%EF%BC%9AMethod-Swizzling/">ObjC 学习笔记（五）：Method Swizzling</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="widget-wrap">
+  <h3 class="widget-title">
+    关于我
+  </h3>
+  <div class="widget">
+    <div class="profile">
+      <div class="motto">
+        
+          <p class="source"><span>花若盛开，蝴蝶自来</span></p>
+        
+        <div class="quote">&#10077;</div>
+        <p class="content">积累沉淀，不愧于心，不忘于行。</p>
+        <div class="close quote">&#10077;</div>
+      </div>
+      <div class="basic">
+        <div class="avatar"></div>
+        <div class="info">
+          <h2 class="name">zevwings</h2>
+          <h3 class="location">Chengdu</h3>
+        </div>
+      </div>
+      <div class="links">
+        
+          <a id="github-link" class="profile-link" target="_blank" rel="noopener" href="https://github.com/zevwings" title="GitHub"></a>
+        
+        
+          <a id="email-link" class="profile-link" href="mailto:zev.wings@gmail.com" title="邮箱"></a>
+        
+        
+          <a id="rss-link" class="profile-link" href="/atom.xml" title="RSS"></a>
+        
+      </div>
+    </div>
+    
+      <div class="holder">
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+      </div>
+    
+  </div>
+</div>
+
+</aside>
+
+  </section>
+</div>
+
+
+      <footer id="footer">
+  <p>Copyright &copy; 2022 zevwings</p>
+  <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> • Theme <a
+                href="https://github.com/DukeLuo/hexo-theme-candelas" target="_blank">Candelas</a></p>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/categories" class="mobile-nav-link">Category</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archive</a>
+  
+</nav>
+
+  </div>
+</body>
+</html>
